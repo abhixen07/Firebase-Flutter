@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_learning/ui/auth/sign_up_screen.dart';
+import 'package:firebase_learning/ui/posts/post_screen.dart';
+import 'package:firebase_learning/ui/utils/utils.dart';
 import 'package:firebase_learning/widget/round_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,12 +19,41 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formField = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool loading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
+    super.dispose();
     emailController.dispose();
     passwordController.dispose();
     // TODO: implement dispose
+  }
+
+  void login() {
+    setState(() {
+      loading = true;
+    });
+
+    _auth
+        .signInWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text.toString())
+        .then((value) {
+      Utils().toastMessage(value.user!.email.toString());
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>const PostScreen()));
+      setState(() {
+        loading = false;
+      });
+
+    }).onError((error, stackTrace) {
+      debugPrint(error.toString());
+      Utils().toastMessage(error.toString());
+      setState(() {
+        loading = false;
+      });
+
+    });
   }
 
   @override
@@ -30,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return WillPopScope(
       ///for exit app
 
-      onWillPop: () async{
+      onWillPop: () async {
         SystemNavigator.pop();
         return true;
       },
@@ -39,8 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
           automaticallyImplyLeading: false,
           title: Text('Login',
               style: GoogleFonts.montserrat(
-                color: Colors.white,fontWeight: FontWeight.w700
-          )),
+                  color: Colors.white, fontWeight: FontWeight.w700)),
           backgroundColor: Colors.black,
           centerTitle: true,
         ),
@@ -89,8 +120,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 RoundButton(
                   title: 'Login',
+                  loading: loading,
                   onPress: () {
-                    if (_formField.currentState!.validate()) {}
+                    if (_formField.currentState!.validate()) {
+                      login();
+                    }
                   },
                 ),
                 const SizedBox(

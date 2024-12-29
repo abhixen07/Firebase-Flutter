@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:firebase_learning/ui/auth/login_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SplashServices {
@@ -9,7 +7,7 @@ class SplashServices {
 
 
     Timer(const Duration(seconds: 3), () =>
-        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen())),
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen())),
 
     );
   }

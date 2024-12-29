@@ -1,7 +1,9 @@
 import 'package:firebase_learning/ui/auth/login_screen.dart';
+import 'package:firebase_learning/ui/utils/utils.dart';
 import 'package:firebase_learning/widget/round_button.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class SignUpScreen extends StatefulWidget {
@@ -14,22 +16,52 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   ///for checking validation used form
   final _formField = GlobalKey<FormState>();
+  bool loading = false;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   void dispose() {
+    super.dispose();
     emailController.dispose();
     passwordController.dispose();
     // TODO: implement dispose
-
-
   }
+
+  void signUp() {
+    setState(() {
+      loading = true;
+    });
+
+    ///create user with auth
+    ///registration of user process with firebase
+    _auth
+        .createUserWithEmailAndPassword(
+        email: emailController.text.toString(),
+        password: passwordController.text.toString()).
+
+    ///handle exception with it  and success message
+    then((value) {
+      setState(() {
+        loading = false;
+      });
+    }).onError((error, stackTrace) {
+      ///showing exception on UI
+      Utils().toastMessage(error.toString());
+      setState(() {
+        loading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.black,
-        title: Text('Sign Up ',
+        title: Text('Sign Up',
             style: GoogleFonts.montserrat(
                 color: Colors.white,fontWeight: FontWeight.w700
             )),
@@ -81,8 +113,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               RoundButton(
                 title: 'Sign Up ',
+                loading: loading,
                 onPress: () {
-                  if (_formField.currentState!.validate()) {}
+                  if (_formField.currentState!.validate()) {
+                    signUp();
+                  }
                 },
               ),
               const SizedBox(
